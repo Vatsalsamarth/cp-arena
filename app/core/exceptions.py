@@ -1,40 +1,70 @@
-class AppException(Exception):
+class CPArenaException(Exception):
     """
-    Base class for all application-specific exceptions.
-    """
-
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(message)
-
-
-class UserAlreadyExistsError(AppException):
-    """
-    Raised when a username or email already exists.
+    Base exception for all application-specific exceptions.
     """
 
     pass
 
 
-class InvalidCredentialsError(AppException):
+class AuthenticationError(CPArenaException):
     """
-    Raised when authentication fails due to invalid credentials.
-    """
-
-    pass
-
-
-class ProblemAlreadyExistsError(AppException):
-    """
-    Raised when a problem title or slug already exists.
+    Raised when authentication fails.
     """
 
     pass
 
 
-class ProblemNotFoundError(AppException):
+class InvalidCredentialsError(AuthenticationError):
     """
-    Raised when a requested problem does not exist.
+    Raised when login credentials are invalid.
+    """
+
+    pass
+
+
+class AuthorizationError(CPArenaException):
+    """
+    Raised when a user is not authorized.
+    """
+
+    pass
+
+
+class UserAlreadyExistsError(CPArenaException):
+    """
+    Raised when a user already exists.
+    """
+
+    pass
+
+
+class UserNotFoundError(CPArenaException):
+    """
+    Raised when a user cannot be found.
+    """
+
+    pass
+
+
+class ProblemAlreadyExistsError(CPArenaException):
+    """
+    Raised when a problem already exists.
+    """
+
+    pass
+
+
+class ProblemNotFoundError(CPArenaException):
+    """
+    Raised when a problem cannot be found.
+    """
+
+    pass
+
+
+class SubmissionNotFoundError(CPArenaException):
+    """
+    Raised when a submission cannot be found.
     """
 
     pass
