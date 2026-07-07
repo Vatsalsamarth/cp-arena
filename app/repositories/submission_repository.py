@@ -1,7 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models.submission import Submission
+from app.models.submission import Submission, SubmissionStatus
 from app.schemas.submission import SubmissionFilters
 
 
@@ -94,3 +94,42 @@ class SubmissionRepository:
         total = self.db.scalar(count_stmt) or 0
 
         return items, total
+
+    def count_by_user(
+        self,
+        user_id: int,
+    ) -> int:
+        """
+        Count total submissions by a user.
+        """
+
+        stmt = (
+            select(func.count())
+            .select_from(Submission)
+            .where(
+                Submission.user_id == user_id
+            )
+        )
+
+        return self.db.scalar(stmt) or 0
+
+    def count_by_user_and_status(
+        self,
+        *,
+        user_id: int,
+        status: SubmissionStatus,
+    ) -> int:
+        """
+        Count submissions by user and status.
+        """
+
+        stmt = (
+            select(func.count())
+            .select_from(Submission)
+            .where(
+                Submission.user_id == user_id,
+                Submission.status == status,
+            )
+        )
+
+        return self.db.scalar(stmt) or 0
