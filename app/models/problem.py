@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, Integer, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
@@ -53,6 +55,13 @@ class Problem(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    submissions: Mapped[list["Submission"]] = relationship(
+        "Submission",
+        back_populates="problem",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     def __repr__(self) -> str:
