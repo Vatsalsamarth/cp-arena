@@ -6,6 +6,7 @@ from app.core.exceptions import (
 )
 from app.models.submission import Submission
 from app.models.user import User
+from app.queue.redis_queue import RedisQueue
 from app.repositories.problem_repository import ProblemRepository
 from app.repositories.submission_repository import SubmissionRepository
 from app.schemas.submission import (
@@ -22,6 +23,7 @@ class SubmissionService:
     def __init__(self, db: Session):
         self.problem_repository = ProblemRepository(db)
         self.submission_repository = SubmissionRepository(db)
+        self.queue = RedisQueue()
 
     def create_submission(
         self,
@@ -30,7 +32,7 @@ class SubmissionService:
         submission_create: SubmissionCreate,
     ) -> Submission:
         """
-        Create a new submission.
+        Create a new submission and enqueue it for judging.
         """
 
         problem = self.problem_repository.get_by_id(
@@ -42,12 +44,18 @@ class SubmissionService:
                 "Problem not found."
             )
 
-        return self.submission_repository.create(
+        submission = self.submission_repository.create(
             user_id=current_user.id,
             problem_id=problem.id,
             language=submission_create.language,
             source_code=submission_create.source_code,
         )
+
+        self.queue.enqueue_submission(
+            submission.id
+        )
+
+        return submission
 
     def list_submissions(
         self,
