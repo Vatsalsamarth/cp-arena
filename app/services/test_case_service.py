@@ -6,7 +6,11 @@ from app.repositories.problem_repository import ProblemRepository
 from app.repositories.test_case_repository import (
     TestCaseRepository,
 )
-from app.schemas.test_case import TestCaseCreate
+from app.schemas.test_case import (
+    TestCaseCreate,
+    TestCaseListResponse,
+    TestCaseResponse,
+)
 
 
 class TestCaseService:
@@ -48,7 +52,9 @@ class TestCaseService:
         self,
         *,
         problem_id: int,
-    ) -> list[TestCase]:
+        limit: int = 20,
+        offset: int = 0,
+    ) -> TestCaseListResponse:
         """
         Return all test cases for a problem.
         """
@@ -62,6 +68,30 @@ class TestCaseService:
                 "Problem not found."
             )
 
-        return self.test_case_repository.get_by_problem_id(
-            problem_id
+        items = self.test_case_repository.get_by_problem_id(
+            problem_id=problem.id,
+            limit=limit,
+            offset=offset,
+        )
+
+        total = self.test_case_repository.count_by_problem_id(
+            problem_id=problem.id
+        )
+
+        return TestCaseListResponse(
+            items=[
+                TestCaseResponse(
+                    id=tc.id,
+                    problem_id=tc.problem_id,
+                    input_data=tc.input_data,
+                    expected_output=tc.expected_output,
+                    is_sample=tc.is_sample,
+                    created_at=tc.created_at,
+                )
+                for tc in items
+            ],
+            total=total,
+            limit=limit,
+            offset=offset,
+            has_next=offset + limit < total,
         )

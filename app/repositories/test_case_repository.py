@@ -40,6 +40,8 @@ class TestCaseRepository:
     def get_by_problem_id(
         self,
         problem_id: int,
+        limit: int | None = None,
+        offset: int | None = None,
     ) -> list[TestCase]:
         """
         Return all test cases for a problem.
@@ -53,9 +55,13 @@ class TestCaseRepository:
             .order_by(TestCase.id.asc())
         )
 
-        return list(
-            self.db.scalars(stmt).all()
-        )
+        if limit is not None:
+            stmt = stmt.limit(limit)
+
+        if offset is not None:
+            stmt = stmt.offset(offset)
+
+        return list(self.db.scalars(stmt).all())
 
     def count_by_problem_id(
         self,

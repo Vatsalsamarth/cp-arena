@@ -68,3 +68,11 @@ class SubmissionNotFoundError(CPArenaException):
     """
 
     pass
+
+
+class QueueUnavailableError(CPArenaException):
+    """
+    Raised when Redis queue operations are unavailable.
+    """
+
+    pass

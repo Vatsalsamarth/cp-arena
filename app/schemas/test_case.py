@@ -38,8 +38,11 @@ class TestCaseResponse(BaseModel):
 
 class TestCaseListResponse(BaseModel):
     """
-    Response schema for multiple test cases.
+    Paginated response for multiple test cases.
     """
 
     items: list[TestCaseResponse]
     total: int
+    limit: int
+    offset: int
+    has_next: bool

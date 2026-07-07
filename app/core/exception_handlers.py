@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
@@ -6,10 +8,13 @@ from app.core.exceptions import (
     AuthorizationError,
     ProblemAlreadyExistsError,
     ProblemNotFoundError,
+    QueueUnavailableError,
     SubmissionNotFoundError,
     UserAlreadyExistsError,
     UserNotFoundError,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -81,4 +86,26 @@ def register_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"detail": str(exc)},
+        )
+
+    @app.exception_handler(QueueUnavailableError)
+    async def queue_unavailable_exception_handler(
+        request: Request,
+        exc: QueueUnavailableError,
+    ) -> JSONResponse:
+        logger.warning("Queue unavailable: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "Submission queue unavailable. Please try again later."},
+        )
+
+    @app.exception_handler(Exception)
+    async def generic_exception_handler(
+        request: Request,
+        exc: Exception,
+    ) -> JSONResponse:
+        logger.exception("Unhandled exception during request.")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Internal server error."},
         )

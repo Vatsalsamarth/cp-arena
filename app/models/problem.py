@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import DateTime, Integer, Index, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -42,6 +42,7 @@ class Problem(Base):
     difficulty: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
+        index=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -59,6 +60,13 @@ class Problem(Base):
 
     submissions: Mapped[list["Submission"]] = relationship(
         "Submission",
+        back_populates="problem",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+    user_statuses: Mapped[list["UserProblemStatus"]] = relationship(
+        "UserProblemStatus",
         back_populates="problem",
         cascade="all, delete-orphan",
         passive_deletes=True,

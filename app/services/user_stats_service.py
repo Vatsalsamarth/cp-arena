@@ -32,32 +32,25 @@ class UserStatsService:
             current_user.id
         )
 
-        accepted = (
-            self.repository.count_by_user_and_status(
-                user_id=current_user.id,
-                status=SubmissionStatus.ACCEPTED,
-            )
+        status_counts = self.repository.count_statuses_by_user(
+            current_user.id
         )
 
-        wrong_answer = (
-            self.repository.count_by_user_and_status(
-                user_id=current_user.id,
-                status=SubmissionStatus.WRONG_ANSWER,
-            )
+        accepted = status_counts.get(
+            SubmissionStatus.ACCEPTED,
+            0,
         )
-
-        runtime_error = (
-            self.repository.count_by_user_and_status(
-                user_id=current_user.id,
-                status=SubmissionStatus.RUNTIME_ERROR,
-            )
+        wrong_answer = status_counts.get(
+            SubmissionStatus.WRONG_ANSWER,
+            0,
         )
-
-        compilation_error = (
-            self.repository.count_by_user_and_status(
-                user_id=current_user.id,
-                status=SubmissionStatus.COMPILATION_ERROR,
-            )
+        runtime_error = status_counts.get(
+            SubmissionStatus.RUNTIME_ERROR,
+            0,
+        )
+        compilation_error = status_counts.get(
+            SubmissionStatus.COMPILATION_ERROR,
+            0,
         )
 
         acceptance_rate = (

@@ -113,6 +113,30 @@ class SubmissionRepository:
 
         return self.db.scalar(stmt) or 0
 
+    def count_statuses_by_user(
+        self,
+        user_id: int,
+    ) -> dict[SubmissionStatus, int]:
+        """
+        Count submissions grouped by status for a user.
+        """
+
+        stmt = (
+            select(
+                Submission.status,
+                func.count().label("status_count"),
+            )
+            .where(Submission.user_id == user_id)
+            .group_by(Submission.status)
+        )
+
+        rows = self.db.execute(stmt).all()
+
+        return {
+            row.status: int(row.status_count)
+            for row in rows
+        }
+
     def count_by_user_and_status(
         self,
         *,

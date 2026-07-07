@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy.orm import Session
 
 from app.judge.docker_runner import DockerRunner
@@ -5,6 +7,7 @@ from app.judge.output_checker import OutputChecker
 from app.models.submission import SubmissionStatus
 from app.repositories.submission_repository import SubmissionRepository
 from app.repositories.test_case_repository import TestCaseRepository
+from app.repositories.user_problem_status_repository import UserProblemStatusRepository
 
 
 class JudgeService:
@@ -15,12 +18,15 @@ class JudgeService:
     def __init__(
         self,
         db: Session,
+        runner: Any | None = None,
+        output_checker: Any | None = None,
     ):
         self.submission_repository = SubmissionRepository(db)
         self.test_case_repository = TestCaseRepository(db)
+        self.user_problem_status_repository = UserProblemStatusRepository(db)
 
-        self.runner = DockerRunner()
-        self.output_checker = OutputChecker()
+        self.runner = runner or DockerRunner()
+        self.output_checker = output_checker or OutputChecker()
 
     def judge_submission(
         self,
@@ -115,6 +121,10 @@ class JudgeService:
         submission.status = SubmissionStatus.ACCEPTED
 
         self.submission_repository.db.commit()
+        self.user_problem_status_repository.create_if_missing(
+            user_id=submission.user_id,
+            problem_id=submission.problem_id,
+        )
 
         print(
             f"[Judge] Accepted submission {submission.id}"

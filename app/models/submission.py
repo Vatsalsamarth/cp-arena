@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Integer, Text, func
+from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Index, Integer, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -31,6 +31,18 @@ class Submission(Base):
     """
 
     __tablename__ = "submissions"
+    __table_args__ = (
+        Index(
+            "ix_submissions_user_id_created_at",
+            "user_id",
+            "created_at",
+        ),
+        Index(
+            "ix_submissions_user_id_status",
+            "user_id",
+            "status",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(
         primary_key=True,
