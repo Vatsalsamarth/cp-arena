@@ -1,8 +1,10 @@
 from sqlalchemy.orm import Session
 
 from app.judge.docker_runner import DockerRunner
+from app.judge.output_checker import OutputChecker
 from app.models.submission import SubmissionStatus
 from app.repositories.submission_repository import SubmissionRepository
+from app.repositories.test_case_repository import TestCaseRepository
 
 
 class JudgeService:
@@ -10,19 +12,25 @@ class JudgeService:
     Business logic for judging submissions.
     """
 
-    def __init__(self, db: Session):
-        self.repository = SubmissionRepository(db)
+    def __init__(
+        self,
+        db: Session,
+    ):
+        self.submission_repository = SubmissionRepository(db)
+        self.test_case_repository = TestCaseRepository(db)
+
         self.runner = DockerRunner()
+        self.output_checker = OutputChecker()
 
     def judge_submission(
         self,
         submission_id: int,
     ) -> None:
         """
-        Judge a submission using Docker.
+        Judge a submission against all test cases.
         """
 
-        submission = self.repository.get_by_id(
+        submission = self.submission_repository.get_by_id(
             submission_id
         )
 
@@ -30,7 +38,7 @@ class JudgeService:
             return
 
         submission.status = SubmissionStatus.RUNNING
-        self.repository.db.commit()
+        self.submission_repository.db.commit()
 
         print(
             f"[Judge] Running submission {submission.id}"
@@ -38,34 +46,76 @@ class JudgeService:
 
         if submission.language.lower() != "python":
             submission.status = SubmissionStatus.COMPILATION_ERROR
-            self.repository.db.commit()
+
+            self.submission_repository.db.commit()
 
             print(
                 f"[Judge] Unsupported language: {submission.language}"
             )
+
             return
 
-        result = self.runner.run_python(
-            submission.source_code
+        test_cases = self.test_case_repository.get_by_problem_id(
+            submission.problem_id
         )
 
-        submission.execution_time_ms = (
-            result.execution_time_ms
-        )
+        if not test_cases:
+            submission.status = SubmissionStatus.WRONG_ANSWER
 
-        if result.exit_code == 0:
-            submission.status = SubmissionStatus.ACCEPTED
-        else:
-            submission.status = SubmissionStatus.RUNTIME_ERROR
+            self.submission_repository.db.commit()
 
-        self.repository.db.commit()
+            print(
+                "[Judge] No test cases found."
+            )
+
+            return
+
+        for test_case in test_cases:
+
+            result = self.runner.run_python(
+                source_code=submission.source_code,
+                stdin=test_case.input_data,
+            )
+
+            submission.execution_time_ms = (
+                result.execution_time_ms
+            )
+
+            if result.exit_code != 0:
+                submission.status = (
+                    SubmissionStatus.RUNTIME_ERROR
+                )
+
+                self.submission_repository.db.commit()
+
+                print(
+                    f"[Judge] Runtime error on test case {test_case.id}"
+                )
+
+                return
+
+            passed = self.output_checker.compare(
+                actual=result.stdout,
+                expected=test_case.expected_output,
+            )
+
+            if not passed:
+                submission.status = (
+                    SubmissionStatus.WRONG_ANSWER
+                )
+
+                self.submission_repository.db.commit()
+
+                print(
+                    f"[Judge] Wrong answer on test case {test_case.id}"
+                )
+
+                return
+
+        submission.status = SubmissionStatus.ACCEPTED
+
+        self.submission_repository.db.commit()
 
         print(
-            f"[Judge] Finished submission {submission.id}"
+            f"[Judge] Accepted submission {submission.id}"
         )
-
-        print("STDOUT")
-        print(result.stdout)
-
-        print("STDERR")
-        print(result.stderr)
