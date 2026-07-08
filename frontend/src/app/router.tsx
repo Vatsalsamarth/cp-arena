@@ -1,6 +1,13 @@
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  RouterProvider,
+} from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { LoginPage } from "@/pages/LoginPage";
 
 function RootLayout() {
   return (
@@ -15,7 +22,7 @@ function HomePage() {
     <main className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6">
       <section className="w-full max-w-xl rounded-3xl border border-border bg-card p-10 shadow-2xl">
         <div className="space-y-6 text-center">
-          <span className="inline-flex rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium tracking-wide">
+          <span className="inline-flex rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium">
             CP Arena
           </span>
 
@@ -26,11 +33,11 @@ function HomePage() {
           </h1>
 
           <p className="text-muted-foreground">
-            Enterprise routing foundation initialized successfully.
+            Welcome to CP Arena.
           </p>
 
           <Button size="lg">
-            Router Foundation Ready
+            Platform Ready
           </Button>
         </div>
       </section>
@@ -43,8 +50,21 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        path: "/",
-        element: <HomePage />,
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "/",
+            element: <HomePage />,
+          },
+        ],
+      },
+      {
+        path: "*",
+        element: <Navigate to="/" replace />,
       },
     ],
   },
