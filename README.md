@@ -1,90 +1,251 @@
-# cp-arena
-Production-first competitive programming platform featuring FastAPI, SQLAlchemy, PostgreSQL, Redis, Docker, and AI-powered insights.
-# 🏆 CP Arena
+# 🚀 CP Arena
 
-> A full-stack competitive programming platform featuring secure authentication, asynchronous code judging, Docker-based sandboxed execution, user leaderboards, and an admin dashboard.
+A production-inspired Competitive Programming Platform built with **FastAPI**, **React**, **TypeScript**, **PostgreSQL**, **Redis**, and **Docker**.
 
-<p align="center">
-
-![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.116-green?logo=fastapi)
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)
-![Redis](https://img.shields.io/badge/Redis-Cache-red?logo=redis)
-![Docker](https://img.shields.io/badge/Docker-Container-blue?logo=docker)
-![License](https://img.shields.io/badge/License-MIT-green)
-
-</p>
+Designed with clean architecture, repository pattern, JWT authentication, asynchronous judging, caching, pagination, filtering, and a modern frontend.
 
 ---
 
-# 📌 Overview
+## 📷 Screenshots
 
-CP Arena is a modern competitive programming platform inspired by websites like Codeforces, LeetCode, and HackerRank.
+### Login
 
-The platform allows users to solve programming problems, submit solutions, receive automated verdicts through a background judge worker, and track their performance on a real-time leaderboard.
-
-The project was designed with a production-style architecture using asynchronous job processing, JWT authentication, PostgreSQL, Redis, and Docker.
+![Login](docs/images/login-page.png)
 
 ---
 
-# ✨ Features
+### Dashboard
 
-## 👨‍💻 User Features
-
-- Secure JWT Authentication
-- Browse Programming Problems
-- Monaco Code Editor
-- Submit Code
-- Automatic Code Judging
-- Submission History
-- User Dashboard
-- User Profile
-- Leaderboard
+![Dashboard](docs/images/dashboard.png)
 
 ---
 
-## ⚙️ Admin Features
+### Problems
 
-- Create Problems
-- Manage Test Cases
-- Manage Problems
-- Admin Dashboard
+![Problems](docs/images/problems-page.png)
 
 ---
 
-## ⚡ Judge System
+### Problem Details
 
-- Redis Queue
-- Background Worker
-- Docker Sandbox Execution
-- Multiple Test Cases
-- Automatic Verdict Generation
-- Execution Time Tracking
+![Problem Details](docs/images/problem-details.png)
 
 ---
 
-## 🔒 Security
+### Submissions
+
+![Submissions](docs/images/submissions.png)
+
+---
+
+### Leaderboard
+
+![Leaderboard](docs/images/leaderboard.png)
+
+---
+
+### Profile
+
+![Profile](docs/images/profile.png)
+
+---
+
+# Features
+
+## Authentication
 
 - JWT Authentication
-- Protected API Routes
-- Password Hashing
-- Role-based Authorization
-- Request Size Limiting
-- Rate Limiting
-- Exception Handling
+- Login
+- Registration
+- Protected Routes
+- Role Based Authorization
 
 ---
 
-# 🛠 Tech Stack
+## Problem Management
 
-| Category | Technologies |
-|-----------|--------------|
-| Frontend | React, TypeScript, Vite, React Query, Axios, Tailwind CSS, Monaco Editor |
-| Backend | FastAPI, SQLAlchemy, Alembic |
-| Database | PostgreSQL |
-| Cache / Queue | Redis |
-| Judge | Docker |
-| Authentication | JWT |
-| Version Control | Git + GitHub |
+- Create Problems
+- Delete Problems
+- Difficulty Levels
+- Tags
+- Pagination
+- Search
+- Filtering
+
+---
+
+## Online Judge
+
+- Docker Sandbox
+- Queue-based Judging
+- Redis Queue
+- Worker Architecture
+- Test Case Validation
+- Multiple Verdicts
+- Runtime Tracking
+
+---
+
+## User Features
+
+- Dashboard
+- Profile
+- Submission History
+- Leaderboard
+- User Statistics
+
+---
+
+## Backend
+
+- FastAPI
+- SQLAlchemy
+- Alembic
+- PostgreSQL
+- Redis
+- Docker
+- Repository Pattern
+- Service Layer
+- Dependency Injection
+
+---
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- React Query
+- Axios
+- TailwindCSS
+- React Router
+
+---
+
+# Tech Stack
+
+| Backend | Frontend | Database | DevOps |
+|----------|----------|----------|---------|
+| FastAPI | React | PostgreSQL | Docker |
+| SQLAlchemy | TypeScript | Redis | Docker Compose |
+| Alembic | Tailwind CSS | | GitHub |
+
+---
+
+# Project Structure
+
+```
+cp-arena/
+│
+├── app/
+├── frontend/
+├── tests/
+├── alembic/
+├── docs/
+│   └── images/
+├── requirements/
+└── README.md
+```
+
+---
+
+# Running the Project
+
+## Backend
+
+```bash
+git clone https://github.com/Vatsalsamarth/cp-arena.git
+
+cd cp-arena
+
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip install -r requirements.txt
+
+make migrate
+
+make run
+```
+
+## Frontend
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+# API Highlights
+
+- JWT Authentication
+- User Management
+- Problem CRUD
+- Submission API
+- Leaderboard
+- Dashboard Statistics
+- Profile
+- Pagination
+- Search
+- Filtering
+
+---
+
+# Architecture
+
+```
+React Frontend
+      │
+      ▼
+ FastAPI REST API
+      │
+      ▼
+ Service Layer
+      │
+      ▼
+ Repository Layer
+      │
+      ▼
+ PostgreSQL
+
+          │
+          ▼
+
+ Redis Queue
+
+          │
+          ▼
+
+ Judge Worker
+
+          │
+          ▼
+
+ Docker Sandbox
+```
+
+---
+
+# Future Improvements
+
+- Contest System
+- Code Editor
+- Multiple Languages
+- Real-time Leaderboard
+- Rating System
+- Discussion Forum
+- Editorials
+- Plagiarism Detection
+- Email Verification
+- OAuth Login
+
+---
+
+# License
+
+MIT License
