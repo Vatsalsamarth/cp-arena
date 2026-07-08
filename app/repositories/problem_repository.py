@@ -62,26 +62,24 @@ class ProblemRepository:
         together with the total number of matching problems.
         """
 
+        filters = []
+
+        if title:
+            filters.append(Problem.title.ilike(f"%{title}%"))
+
+        if slug:
+            filters.append(Problem.slug.ilike(f"%{slug}%"))
+
+        if min_difficulty is not None:
+            filters.append(Problem.difficulty >= min_difficulty)
+
+        if max_difficulty is not None:
+            filters.append(Problem.difficulty <= max_difficulty)
+
         stmt = select(Problem)
         count_stmt = select(func.count()).select_from(Problem)
 
-        if title:
-            condition = Problem.title.ilike(f"%{title}%")
-            stmt = stmt.where(condition)
-            count_stmt = count_stmt.where(condition)
-
-        if slug:
-            condition = Problem.slug.ilike(f"%{slug}%")
-            stmt = stmt.where(condition)
-            count_stmt = count_stmt.where(condition)
-
-        if min_difficulty is not None:
-            condition = Problem.difficulty >= min_difficulty
-            stmt = stmt.where(condition)
-            count_stmt = count_stmt.where(condition)
-
-        if max_difficulty is not None:
-            condition = Problem.difficulty <= max_difficulty
+        for condition in filters:
             stmt = stmt.where(condition)
             count_stmt = count_stmt.where(condition)
 
@@ -92,14 +90,31 @@ class ProblemRepository:
         }.get(sort_by, Problem.id)
 
         if order == "desc":
-            stmt = stmt.order_by(sort_column.desc())
+            primary_order = sort_column.desc()
+            secondary_order = Problem.id.desc()
         else:
-            stmt = stmt.order_by(sort_column.asc())
+            primary_order = sort_column.asc()
+            secondary_order = Problem.id.asc()
 
-        stmt = stmt.limit(limit).offset(offset)
+        if sort_column == Problem.id:
+            stmt = stmt.order_by(primary_order)
+        else:
+            stmt = stmt.order_by(primary_order, secondary_order)
 
-        items = list(self.db.scalars(stmt).all())
-        total = self.db.scalar(count_stmt) or 0
+        paginated_stmt = stmt.limit(limit + 1).offset(offset)
+        rows = list(self.db.scalars(paginated_stmt).all())
+
+        has_next = len(rows) > limit
+        items = rows[:limit]
+
+        if has_next:
+            total = self.db.scalar(count_stmt) or 0
+        elif items:
+            total = offset + len(items)
+        elif offset == 0:
+            total = 0
+        else:
+            total = self.db.scalar(count_stmt) or 0
 
         return items, total
 

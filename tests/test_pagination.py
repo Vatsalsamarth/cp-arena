@@ -11,7 +11,6 @@ from app.schemas.test_case import TestCaseCreate as TestCaseCreateSchema
 from app.services.test_case_service import TestCaseService as TestCaseServiceClass
 from app.services.user_problem_status_service import UserProblemStatusService
 
-
 TestCaseModel.__test__ = False
 TestCaseCreateSchema.__test__ = False  # type: ignore[attr-defined]
 TestCaseServiceClass.__test__ = False  # type: ignore[attr-defined]
@@ -26,14 +25,18 @@ def create_user(db: Session, username: str, email: str) -> User:
 
 
 def create_problem(db: Session, title: str, slug: str, difficulty: int) -> Problem:
-    problem = Problem(title=title, slug=slug, statement="statement", difficulty=difficulty)
+    problem = Problem(
+        title=title, slug=slug, statement="statement", difficulty=difficulty
+    )
     db.add(problem)
     db.commit()
     db.refresh(problem)
     return problem
 
 
-def create_user_problem_status(db: Session, user_id: int, problem_id: int, solved_at: datetime | None = None) -> UserProblemStatus:
+def create_user_problem_status(
+    db: Session, user_id: int, problem_id: int, solved_at: datetime | None = None
+) -> UserProblemStatus:
     status = UserProblemStatus(user_id=user_id, problem_id=problem_id)
     if solved_at is not None:
         status.first_solved_at = solved_at  # type: ignore[assignment]

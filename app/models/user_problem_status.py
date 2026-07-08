@@ -10,7 +10,9 @@ from app.db.base import Base
 class UserProblemStatus(Base):
     __tablename__ = "user_problem_status"
     __table_args__ = (
-        UniqueConstraint("user_id", "problem_id", name="uq_user_problem_status_user_problem"),
+        UniqueConstraint(
+            "user_id", "problem_id", name="uq_user_problem_status_user_problem"
+        ),
         Index(
             "ix_user_problem_status_user_id_first_solved_at",
             "user_id",

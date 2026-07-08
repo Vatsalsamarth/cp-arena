@@ -16,7 +16,6 @@ from app.services.user_problem_status_service import UserProblemStatusService
 from app.services.user_service import UserService
 from app.services.user_stats_service import UserStatsService
 
-
 router = APIRouter(
     prefix="/users",
     tags=["Users"],
@@ -38,9 +37,7 @@ def create_user(
 
     service = UserService(db)
 
-    created_user = service.create_user(
-        user
-    )
+    created_user = service.create_user(user)
 
     return created_user
 

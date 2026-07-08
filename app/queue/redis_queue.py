@@ -1,5 +1,7 @@
 import logging
 import time
+from collections.abc import Callable
+from typing import Any
 
 from redis import RedisError
 
@@ -20,7 +22,12 @@ class RedisQueue:
     def __init__(self):
         self.redis = redis_client
 
-    def _execute_redis_call(self, func, *args, **kwargs):
+    def _execute_redis_call(
+        self,
+        func: Callable[..., Any],
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
         attempts = 2
         delay = 0.5
 
@@ -36,9 +43,7 @@ class RedisQueue:
                 )
                 if attempt == attempts:
                     logger.exception("Redis queue is unavailable after retries.")
-                    raise QueueUnavailableError(
-                        "Redis queue is unavailable."
-                    ) from exc
+                    raise QueueUnavailableError("Redis queue is unavailable.") from exc
                 time.sleep(delay)
 
     def enqueue_submission(
@@ -81,7 +86,9 @@ class RedisQueue:
         Return the current queue length.
         """
 
-        return self._execute_redis_call(
-            self.redis.llen,
-            SUBMISSION_QUEUE,
+        return int(
+            self._execute_redis_call(
+                self.redis.llen,
+                SUBMISSION_QUEUE,
+            )
         )

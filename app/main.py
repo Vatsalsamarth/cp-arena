@@ -1,4 +1,5 @@
 import logging
+from typing import Any, cast
 
 from fastapi import FastAPI
 
@@ -33,9 +34,9 @@ logger.info(
 
 register_exception_handlers(app)
 
-app.add_middleware(RateLimitMiddleware)
-app.add_middleware(RequestSizeLimiterMiddleware)
-app.add_middleware(RequestContextMiddleware)
+app.add_middleware(cast(Any, RateLimitMiddleware))
+app.add_middleware(cast(Any, RequestSizeLimiterMiddleware))
+app.add_middleware(cast(Any, RequestContextMiddleware))
 
 app.include_router(
     api_router,

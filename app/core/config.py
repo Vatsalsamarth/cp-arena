@@ -29,7 +29,6 @@ class Settings(BaseSettings):
         case_sensitive=True,
     )
 
-
     @field_validator("DATABASE_URL")
     def validate_database_url(cls, value: str) -> str:
         if not isinstance(value, str) or not value:
@@ -45,9 +44,7 @@ class Settings(BaseSettings):
         )
 
         if not value.startswith(valid_prefixes):
-            raise ValueError(
-                "DATABASE_URL must be a valid SQLAlchemy database URL."
-            )
+            raise ValueError("DATABASE_URL must be a valid SQLAlchemy database URL.")
 
         return value
 
@@ -57,9 +54,7 @@ class Settings(BaseSettings):
             raise ValueError("REDIS_URL must be set.")
 
         if not value.startswith(("redis://", "rediss://")):
-            raise ValueError(
-                "REDIS_URL must use redis:// or rediss:// scheme."
-            )
+            raise ValueError("REDIS_URL must use redis:// or rediss:// scheme.")
 
         return value
 
@@ -74,9 +69,7 @@ class Settings(BaseSettings):
 
         debug = info.data.get("DEBUG", True)
         if not debug and len(value) < 32:
-            raise ValueError(
-                "SECRET_KEY must be set and at least 32 characters long."
-            )
+            raise ValueError("SECRET_KEY must be set and at least 32 characters long.")
 
         return value
 

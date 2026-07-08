@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from fastapi import Request
@@ -24,12 +24,9 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self,
         request: Request,
-        call_next: Any,
+        call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        request_id = (
-            request.headers.get("X-Request-ID")
-            or str(uuid.uuid4())
-        )
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
         set_request_id(request_id)
         request.state.request_id = request_id
 
@@ -68,7 +65,7 @@ class RequestSizeLimiterMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self,
         request: Request,
-        call_next: Any,
+        call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
         content_length = request.headers.get("content-length")
 
@@ -107,13 +104,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self,
         request: Request,
-        call_next: Any,
+        call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        client_ip = (
-            request.client.host
-            if request.client is not None
-            else "unknown"
-        )
+        client_ip = request.client.host if request.client is not None else "unknown"
         key = f"rate:{client_ip}"
         allowed, ttl = self.rate_limiter.allow_request(
             key,

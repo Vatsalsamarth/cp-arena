@@ -29,7 +29,9 @@ class FakeRunner:
         return self._result
 
 
-def create_submission_with_test_case(db: Session, stdout: str, exit_code: int = 0) -> tuple[Submission, User, Problem]:
+def create_submission_with_test_case(
+    db: Session, stdout: str, exit_code: int = 0
+) -> tuple[Submission, User, Problem]:
     user = User(
         username="judgeuser",
         email="judgeuser@example.com",

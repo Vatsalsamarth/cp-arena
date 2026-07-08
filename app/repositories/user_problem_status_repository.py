@@ -1,7 +1,5 @@
 from typing import Any
 
-import json
-
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
@@ -20,8 +18,15 @@ class UserProblemStatusRepository:
         self.db = db
 
     def _invalidate_leaderboard_cache(self) -> None:
-        for key in redis_client.scan_iter(match="leaderboard:*"):
-            redis_client.delete(key)
+        # Delegate cache invalidation to shared helper to avoid duplicating
+        # the tracked-key deletion logic.
+        from app.core.cache import invalidate_tracked
+
+        try:
+            invalidate_tracked(redis_client, "leaderboard:keys")
+        except Exception:
+            # Non-fatal: cache invalidation should not break DB writes.
+            pass
 
     def get_by_user_and_problem(
         self,
@@ -64,17 +69,19 @@ class UserProblemStatusRepository:
         )
 
         if order == "desc":
-            sort_column = sort_column.desc()
+            primary_order = sort_column.desc()
+            secondary_order = UserProblemStatus.id.desc()
         else:
-            sort_column = sort_column.asc()
+            primary_order = sort_column.asc()
+            secondary_order = UserProblemStatus.id.asc()
 
         stmt = (
             select(UserProblemStatus)
             .join(UserProblemStatus.problem)
             .options(selectinload(UserProblemStatus.problem))
             .where(UserProblemStatus.user_id == user_id)
-            .order_by(sort_column)
-            .limit(limit)
+            .order_by(primary_order, secondary_order)
+            .limit(limit + 1)
             .offset(offset)
         )
 
@@ -84,8 +91,18 @@ class UserProblemStatusRepository:
             .where(UserProblemStatus.user_id == user_id)
         )
 
-        items = list(self.db.scalars(stmt).all())
-        total = self.db.scalar(count_stmt) or 0
+        rows = list(self.db.scalars(stmt).all())
+        has_next = len(rows) > limit
+        items = rows[:limit]
+
+        if has_next:
+            total = self.db.scalar(count_stmt) or 0
+        elif items:
+            total = offset + len(items)
+        elif offset == 0:
+            total = 0
+        else:
+            total = self.db.scalar(count_stmt) or 0
 
         return items, total
 
@@ -112,24 +129,43 @@ class UserProblemStatusRepository:
         )
 
         if sort_by == "username":
-            order_column = User.username
+            if order == "desc":
+                stmt = base_stmt.order_by(User.username.desc(), User.id.asc())
+            else:
+                stmt = base_stmt.order_by(User.username.asc(), User.id.asc())
         else:
-            order_column = func.count(UserProblemStatus.id)
+            score_column = func.count(UserProblemStatus.id)
+            if order == "desc":
+                stmt = base_stmt.order_by(
+                    score_column.desc(),
+                    User.username.asc(),
+                    User.id.asc(),
+                )
+            else:
+                stmt = base_stmt.order_by(
+                    score_column.asc(),
+                    User.username.asc(),
+                    User.id.asc(),
+                )
 
-        if order == "desc":
-            order_column = order_column.desc()
+        stmt = stmt.limit(limit + 1).offset(offset)
+
+        count_stmt = select(
+            func.count(func.distinct(UserProblemStatus.user_id))
+        ).select_from(UserProblemStatus)
+
+        rows_with_extra = self.db.execute(stmt).all()
+        has_next = len(rows_with_extra) > limit
+        rows = rows_with_extra[:limit]
+
+        if has_next:
+            total = self.db.scalar(count_stmt) or 0
+        elif rows:
+            total = offset + len(rows)
+        elif offset == 0:
+            total = 0
         else:
-            order_column = order_column.asc()
-
-        stmt = base_stmt.order_by(order_column, User.username.asc()).limit(limit).offset(offset)
-
-        count_stmt = (
-            select(func.count(func.distinct(UserProblemStatus.user_id)))
-            .select_from(UserProblemStatus)
-        )
-
-        rows = self.db.execute(stmt).all()
-        total = self.db.scalar(count_stmt) or 0
+            total = self.db.scalar(count_stmt) or 0
 
         return [
             (

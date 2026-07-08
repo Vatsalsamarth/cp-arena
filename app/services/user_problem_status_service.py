@@ -2,6 +2,7 @@ import json
 
 from sqlalchemy.orm import Session
 
+from app.core.cache import set_tracked
 from app.core.redis import redis_client
 from app.models.user import User
 from app.repositories.user_problem_status_repository import (
@@ -72,9 +73,7 @@ class UserProblemStatusService:
         Return leaderboard entries ordered by solved problem count.
         """
 
-        cache_key = (
-            f"leaderboard:{sort_by}:{order}:{limit}:{offset}"
-        )
+        cache_key = f"leaderboard:{sort_by}:{order}:{limit}:{offset}"
         cached = redis_client.get(cache_key)
 
         if cached is not None:
@@ -120,9 +119,12 @@ class UserProblemStatusService:
             "has_next": offset + limit < total,
         }
 
-        redis_client.set(
-            cache_key,
-            json.dumps(payload),
+        # Use helper to set the cache and track the key for invalidation.
+        set_tracked(
+            redis_client=redis_client,
+            tracking_set="leaderboard:keys",
+            key=cache_key,
+            value=json.dumps(payload),
             ex=15,
         )
 

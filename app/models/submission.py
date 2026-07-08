@@ -2,11 +2,17 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Index, Integer, Text, func
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, Text, func
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.problem import Problem
+    from app.models.user import User
 
 
 class SubmissionStatus(str, Enum):
@@ -41,6 +47,18 @@ class Submission(Base):
             "ix_submissions_user_id_status",
             "user_id",
             "status",
+        ),
+        Index(
+            "ix_submissions_user_problem_created_at",
+            "user_id",
+            "problem_id",
+            "created_at",
+        ),
+        Index(
+            "ix_submissions_user_status_created_at",
+            "user_id",
+            "status",
+            "created_at",
         ),
     )
 
@@ -95,12 +113,12 @@ class Submission(Base):
         nullable=False,
     )
 
-    user: Mapped["User"] = relationship(
+    user: Mapped[User] = relationship(
         "User",
         back_populates="submissions",
     )
 
-    problem: Mapped["Problem"] = relationship(
+    problem: Mapped[Problem] = relationship(
         "Problem",
         back_populates="submissions",
     )

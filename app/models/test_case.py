@@ -12,9 +12,11 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
-class TestCase(Base):
-    """
-    Test case belonging to a problem.
+class ProblemTestCase(Base):
+    """A test case that belongs to a problem.
+
+    Renamed from `TestCase` to avoid pytest collecting this SQLAlchemy model
+    as a test class during test discovery.
     """
 
     __tablename__ = "test_cases"
@@ -56,7 +58,11 @@ class TestCase(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<TestCase(id={self.id}, "
-            f"problem_id={self.problem_id})>"
-        )
+        return f"<ProblemTestCase(id={self.id}, problem_id={self.problem_id})>"
+
+
+# Backwards-compatible export: some modules/tests import `TestCase` from
+# `app.models.test_case`. Provide the legacy name while preventing pytest
+# from collecting it as a test class by setting `__test__ = False`.
+ProblemTestCase.__test__ = False
+TestCase = ProblemTestCase

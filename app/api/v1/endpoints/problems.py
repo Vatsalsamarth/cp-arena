@@ -40,40 +40,33 @@ def create_problem(
 )
 def list_problems(
     db: Session = Depends(get_db),
-
     title: str | None = Query(
         default=None,
         description="Search by title.",
     ),
-
     slug: str | None = Query(
         default=None,
         description="Search by slug.",
     ),
-
     min_difficulty: int | None = Query(
         default=None,
         ge=800,
         le=3500,
     ),
-
     max_difficulty: int | None = Query(
         default=None,
         ge=800,
         le=3500,
     ),
-
     sort_by: Literal[
         "id",
         "difficulty",
         "title",
     ] = Query(default="id"),
-
     order: Literal[
         "asc",
         "desc",
     ] = Query(default="asc"),
-
     limit: Annotated[
         int,
         Query(
@@ -81,7 +74,6 @@ def list_problems(
             le=100,
         ),
     ] = 20,
-
     offset: Annotated[
         int,
         Query(

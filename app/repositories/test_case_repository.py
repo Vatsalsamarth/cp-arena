@@ -1,7 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models.test_case import TestCase
+from app.models.test_case import ProblemTestCase
 
 
 class TestCaseRepository:
@@ -19,12 +19,12 @@ class TestCaseRepository:
         input_data: str,
         expected_output: str,
         is_sample: bool,
-    ) -> TestCase:
+    ) -> ProblemTestCase:
         """
         Create a new test case.
         """
 
-        test_case = TestCase(
+        test_case = ProblemTestCase(
             problem_id=problem_id,
             input_data=input_data,
             expected_output=expected_output,
@@ -42,17 +42,15 @@ class TestCaseRepository:
         problem_id: int,
         limit: int | None = None,
         offset: int | None = None,
-    ) -> list[TestCase]:
+    ) -> list[ProblemTestCase]:
         """
         Return all test cases for a problem.
         """
 
         stmt = (
-            select(TestCase)
-            .where(
-                TestCase.problem_id == problem_id
-            )
-            .order_by(TestCase.id.asc())
+            select(ProblemTestCase)
+            .where(ProblemTestCase.problem_id == problem_id)
+            .order_by(ProblemTestCase.id.asc())
         )
 
         if limit is not None:
@@ -62,6 +60,42 @@ class TestCaseRepository:
             stmt = stmt.offset(offset)
 
         return list(self.db.scalars(stmt).all())
+
+    def list_by_problem_id_paginated(
+        self,
+        *,
+        problem_id: int,
+        limit: int,
+        offset: int,
+    ) -> tuple[list[ProblemTestCase], int]:
+        """
+        Return paginated test cases and exact total for a problem.
+
+        Uses a limit+1 probe to avoid COUNT on terminal pages.
+        """
+
+        stmt = (
+            select(ProblemTestCase)
+            .where(ProblemTestCase.problem_id == problem_id)
+            .order_by(ProblemTestCase.id.asc())
+            .limit(limit + 1)
+            .offset(offset)
+        )
+
+        rows = list(self.db.scalars(stmt).all())
+        has_next = len(rows) > limit
+        items = rows[:limit]
+
+        if has_next:
+            total = self.count_by_problem_id(problem_id)
+        elif items:
+            total = offset + len(items)
+        elif offset == 0:
+            total = 0
+        else:
+            total = self.count_by_problem_id(problem_id)
+
+        return items, total
 
     def count_by_problem_id(
         self,
@@ -73,10 +107,8 @@ class TestCaseRepository:
 
         stmt = (
             select(func.count())
-            .select_from(TestCase)
-            .where(
-                TestCase.problem_id == problem_id
-            )
+            .select_from(ProblemTestCase)
+            .where(ProblemTestCase.problem_id == problem_id)
         )
 
         return self.db.scalar(stmt) or 0

@@ -7,7 +7,6 @@ from app.api.v1.endpoints.submissions import router as submissions_router
 from app.api.v1.endpoints.test_cases import router as test_cases_router
 from app.api.v1.endpoints.users import router as users_router
 
-
 router = APIRouter()
 
 router.include_router(health_router)

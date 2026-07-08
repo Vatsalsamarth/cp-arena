@@ -29,3 +29,8 @@ def create_redis_client() -> Redis:
 
 
 redis_client = create_redis_client()
+
+
+def get_redis_client() -> Redis:
+    """Return the shared Redis client instance for dependency injection/tests."""
+    return redis_client

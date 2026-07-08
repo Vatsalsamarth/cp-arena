@@ -11,10 +11,7 @@ class OutputChecker:
         Normalize whitespace.
         """
 
-        return "\n".join(
-            line.strip()
-            for line in output.strip().splitlines()
-        )
+        return "\n".join(line.strip() for line in output.strip().splitlines())
 
     @classmethod
     def compare(
@@ -26,8 +23,4 @@ class OutputChecker:
         Check whether outputs match.
         """
 
-        return (
-            cls.normalize(actual)
-            ==
-            cls.normalize(expected)
-        )
+        return cls.normalize(actual) == cls.normalize(expected)

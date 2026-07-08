@@ -69,7 +69,7 @@ class DockerRunner:
                     exit_code=-1,
                     execution_time_ms=int(self.DEFAULT_TIMEOUT_SECONDS * 1000),
                 )
-            except FileNotFoundError as exc:
+            except FileNotFoundError:
                 logger.exception("Docker binary not found.")
                 return ExecutionResult(
                     stdout="",

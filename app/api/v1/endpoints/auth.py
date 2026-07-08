@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.redis import get_redis_client
 from app.core.rate_limiter import RateLimiter
+from app.core.redis import get_redis_client
 from app.db.session import get_db
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.services.auth_service import AuthService
@@ -32,18 +32,18 @@ def login(
 ) -> TokenResponse:
     """
     Authenticate a user and return a JWT access token.
-    
+
     Includes brute-force protection with per-username rate limiting.
     """
 
     rate_limit_key = f"auth_attempt:{credentials.username}"
-    
+
     is_allowed, ttl = rate_limiter.allow_request(
         key=rate_limit_key,
         limit=settings.AUTH_RATE_LIMIT_ATTEMPTS,
         window_seconds=settings.AUTH_RATE_LIMIT_WINDOW_SECONDS,
     )
-    
+
     if not is_allowed:
         logger.warning(
             "login.rate_limited",
@@ -57,7 +57,7 @@ def login(
             detail=f"Too many login attempts. Try again in {ttl} seconds.",
             headers={"Retry-After": str(ttl)},
         )
-    
+
     try:
         service = AuthService(db)
 
@@ -72,12 +72,12 @@ def login(
         )
 
         return TokenResponse(**token)
-    except Exception as e:
+    except Exception as exc:
         logger.error(
             "login.failed",
             extra={
                 "username": credentials.username,
-                "error": str(e),
+                "error": str(exc),
             },
         )
         raise

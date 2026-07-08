@@ -7,7 +7,9 @@ from app.models.user import User
 from app.models.user_problem_status import UserProblemStatus
 
 
-def create_user_and_login(client: TestClient, username: str, email: str, password: str) -> str:
+def create_user_and_login(
+    client: TestClient, username: str, email: str, password: str
+) -> str:
     create_resp = client.post(
         "/api/users",
         json={
@@ -38,21 +40,25 @@ def test_users_solved_and_leaderboard_endpoints(client: TestClient, db: Session)
     )
     auth_headers = {"Authorization": f"Bearer {token}"}
 
-    problem1 = Problem(title="APITest1", slug="apitest1", statement="stmt", difficulty=1000)
-    problem2 = Problem(title="APITest2", slug="apitest2", statement="stmt", difficulty=1200)
+    problem1 = Problem(
+        title="APITest1", slug="apitest1", statement="stmt", difficulty=1000
+    )
+    problem2 = Problem(
+        title="APITest2", slug="apitest2", statement="stmt", difficulty=1200
+    )
     db.add_all([problem1, problem2])
     db.commit()
     db.refresh(problem1)
     db.refresh(problem2)
 
-    user_id = db.scalar(
-        select(User.id).where(User.username == "apiuser")
-    )
+    user_id = db.scalar(select(User.id).where(User.username == "apiuser"))
     assert user_id is not None
-    db.add_all([
-        UserProblemStatus(user_id=user_id, problem_id=problem1.id),
-        UserProblemStatus(user_id=user_id, problem_id=problem2.id),
-    ])
+    db.add_all(
+        [
+            UserProblemStatus(user_id=user_id, problem_id=problem1.id),
+            UserProblemStatus(user_id=user_id, problem_id=problem2.id),
+        ]
+    )
     db.commit()
 
     solved_resp = client.get(

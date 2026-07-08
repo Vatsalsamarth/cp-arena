@@ -22,7 +22,7 @@ def run_worker() -> None:
     while True:
         try:
             item = redis_client.blpop(
-                QUEUE_NAME,
+                [QUEUE_NAME],
                 timeout=0,
             )
         except RedisError as exc:
@@ -36,14 +36,16 @@ def run_worker() -> None:
         if item is None:
             continue
 
+        if len(item) != 2:
+            logger.warning("Unexpected queue payload: %s", item)
+            continue
+
         _, submission_id = item
 
         db = SessionLocal()
 
         try:
-            JudgeService(db).judge_submission(
-                int(submission_id)
-            )
+            JudgeService(db).judge_submission(int(submission_id))
         except Exception:
             logger.exception(
                 "Error while processing submission %s",

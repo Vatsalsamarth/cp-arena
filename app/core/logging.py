@@ -2,7 +2,6 @@ import contextvars
 import json
 import logging
 import sys
-from datetime import datetime
 from typing import Any
 
 from app.core.config import settings
@@ -36,7 +35,7 @@ class StructuredFormatter(logging.Formatter):
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)
 
-        return json.dumps(payload)
+        return json.dumps(payload, default=str)
 
 
 def set_request_id(request_id: str) -> None:

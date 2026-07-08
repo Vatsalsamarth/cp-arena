@@ -46,9 +46,7 @@ class SubmissionRepository:
         Retrieve a submission by ID.
         """
 
-        stmt = select(Submission).where(
-            Submission.id == submission_id
-        )
+        stmt = select(Submission).where(Submission.id == submission_id)
 
         return self.db.scalar(stmt)
 
@@ -61,37 +59,45 @@ class SubmissionRepository:
         with the total number of matches.
         """
 
-        stmt = select(Submission)
-
-        count_stmt = (
-            select(func.count())
-            .select_from(Submission)
-        )
+        conditions = []
 
         if filters.user_id is not None:
-            condition = Submission.user_id == filters.user_id
-            stmt = stmt.where(condition)
-            count_stmt = count_stmt.where(condition)
+            conditions.append(Submission.user_id == filters.user_id)
 
         if filters.problem_id is not None:
-            condition = Submission.problem_id == filters.problem_id
-            stmt = stmt.where(condition)
-            count_stmt = count_stmt.where(condition)
+            conditions.append(Submission.problem_id == filters.problem_id)
 
         if filters.status is not None:
-            condition = Submission.status == filters.status
+            conditions.append(Submission.status == filters.status)
+
+        stmt = select(Submission)
+        count_stmt = select(func.count()).select_from(Submission)
+
+        for condition in conditions:
             stmt = stmt.where(condition)
             count_stmt = count_stmt.where(condition)
 
-        stmt = (
-            stmt.order_by(Submission.created_at.desc())
-            .limit(filters.limit)
+        paginated_stmt = (
+            stmt.order_by(
+                Submission.created_at.desc(),
+                Submission.id.desc(),
+            )
+            .limit(filters.limit + 1)
             .offset(filters.offset)
         )
 
-        items = list(self.db.scalars(stmt).all())
+        rows = list(self.db.scalars(paginated_stmt).all())
+        has_next = len(rows) > filters.limit
+        items = rows[: filters.limit]
 
-        total = self.db.scalar(count_stmt) or 0
+        if has_next:
+            total = self.db.scalar(count_stmt) or 0
+        elif items:
+            total = filters.offset + len(items)
+        elif filters.offset == 0:
+            total = 0
+        else:
+            total = self.db.scalar(count_stmt) or 0
 
         return items, total
 
@@ -106,9 +112,7 @@ class SubmissionRepository:
         stmt = (
             select(func.count())
             .select_from(Submission)
-            .where(
-                Submission.user_id == user_id
-            )
+            .where(Submission.user_id == user_id)
         )
 
         return self.db.scalar(stmt) or 0
@@ -132,10 +136,7 @@ class SubmissionRepository:
 
         rows = self.db.execute(stmt).all()
 
-        return {
-            row.status: int(row.status_count)
-            for row in rows
-        }
+        return {row.status: int(row.status_count) for row in rows}
 
     def count_by_user_and_status(
         self,

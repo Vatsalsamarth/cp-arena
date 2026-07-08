@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ProblemNotFoundError
-from app.models.test_case import TestCase
+from app.models.test_case import ProblemTestCase
 from app.repositories.problem_repository import ProblemRepository
 from app.repositories.test_case_repository import (
     TestCaseRepository,
@@ -27,19 +27,15 @@ class TestCaseService:
         *,
         problem_id: int,
         test_case_create: TestCaseCreate,
-    ) -> TestCase:
+    ) -> ProblemTestCase:
         """
         Create a test case for a problem.
         """
 
-        problem = self.problem_repository.get_by_id(
-            problem_id
-        )
+        problem = self.problem_repository.get_by_id(problem_id)
 
         if problem is None:
-            raise ProblemNotFoundError(
-                "Problem not found."
-            )
+            raise ProblemNotFoundError("Problem not found.")
 
         return self.test_case_repository.create(
             problem_id=problem.id,
@@ -59,23 +55,15 @@ class TestCaseService:
         Return all test cases for a problem.
         """
 
-        problem = self.problem_repository.get_by_id(
-            problem_id
-        )
+        problem = self.problem_repository.get_by_id(problem_id)
 
         if problem is None:
-            raise ProblemNotFoundError(
-                "Problem not found."
-            )
+            raise ProblemNotFoundError("Problem not found.")
 
-        items = self.test_case_repository.get_by_problem_id(
+        items, total = self.test_case_repository.list_by_problem_id_paginated(
             problem_id=problem.id,
             limit=limit,
             offset=offset,
-        )
-
-        total = self.test_case_repository.count_by_problem_id(
-            problem_id=problem.id
         )
 
         return TestCaseListResponse(

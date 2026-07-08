@@ -1,7 +1,8 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter
+from sqlalchemy import text
 
 from app.core.config import settings
 from app.core.redis import redis_client
@@ -28,7 +29,7 @@ async def readiness_probe() -> dict:
 
     try:
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
     except Exception as exc:
         logger.error("Database readiness check failed: %s", exc)
         errors.append(f"database: {exc}")
@@ -47,7 +48,7 @@ async def readiness_probe() -> dict:
 
     return {
         "status": "ready",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 

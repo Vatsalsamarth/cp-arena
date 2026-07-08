@@ -28,13 +28,9 @@ class UserStatsService:
         Calculate statistics for a user.
         """
 
-        total = self.repository.count_by_user(
-            current_user.id
-        )
+        total = self.repository.count_by_user(current_user.id)
 
-        status_counts = self.repository.count_statuses_by_user(
-            current_user.id
-        )
+        status_counts = self.repository.count_statuses_by_user(current_user.id)
 
         accepted = status_counts.get(
             SubmissionStatus.ACCEPTED,
@@ -53,11 +49,7 @@ class UserStatsService:
             0,
         )
 
-        acceptance_rate = (
-            (accepted / total) * 100
-            if total > 0
-            else 0.0
-        )
+        acceptance_rate = (accepted / total) * 100 if total > 0 else 0.0
 
         return UserStatsResponse(
             total_submissions=total,

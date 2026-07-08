@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Any
 
 from redis import Redis
 
@@ -16,13 +16,15 @@ class RateLimiter:
         key: str,
         limit: int,
         window_seconds: int,
-    ) -> Tuple[bool, int]:
+    ) -> tuple[bool, int]:
         """Return whether the request is allowed and remaining TTL."""
-        current = self.redis.incr(key)
+        current_raw: Any = self.redis.incr(key)
+        current = int(current_raw)
         if current == 1:
             self.redis.expire(key, window_seconds)
 
-        ttl = self.redis.ttl(key)
+        ttl_raw: Any = self.redis.ttl(key)
+        ttl = int(ttl_raw)
         is_allowed = current <= limit
 
-        return is_allowed, max(int(ttl), 0)
+        return is_allowed, max(ttl, 0)

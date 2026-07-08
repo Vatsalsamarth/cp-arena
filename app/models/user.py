@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.submission import Submission
+    from app.models.user_problem_status import UserProblemStatus
 
 
 class User(Base):
@@ -60,14 +65,14 @@ class User(Base):
         nullable=False,
     )
 
-    submissions: Mapped[list["Submission"]] = relationship(
+    submissions: Mapped[list[Submission]] = relationship(
         "Submission",
         back_populates="user",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
 
-    solved_problems: Mapped[list["UserProblemStatus"]] = relationship(
+    solved_problems: Mapped[list[UserProblemStatus]] = relationship(
         "UserProblemStatus",
         back_populates="user",
         cascade="all, delete-orphan",

@@ -36,9 +36,7 @@ class JudgeService:
         Judge a submission against all test cases.
         """
 
-        submission = self.submission_repository.get_by_id(
-            submission_id
-        )
+        submission = self.submission_repository.get_by_id(submission_id)
 
         if submission is None:
             return
@@ -46,57 +44,42 @@ class JudgeService:
         submission.status = SubmissionStatus.RUNNING
         self.submission_repository.db.commit()
 
-        print(
-            f"[Judge] Running submission {submission.id}"
-        )
+        print(f"[Judge] Running submission {submission.id}")
 
         if submission.language.lower() != "python":
             submission.status = SubmissionStatus.COMPILATION_ERROR
 
             self.submission_repository.db.commit()
 
-            print(
-                f"[Judge] Unsupported language: {submission.language}"
-            )
+            print(f"[Judge] Unsupported language: {submission.language}")
 
             return
 
-        test_cases = self.test_case_repository.get_by_problem_id(
-            submission.problem_id
-        )
+        test_cases = self.test_case_repository.get_by_problem_id(submission.problem_id)
 
         if not test_cases:
             submission.status = SubmissionStatus.WRONG_ANSWER
 
             self.submission_repository.db.commit()
 
-            print(
-                "[Judge] No test cases found."
-            )
+            print("[Judge] No test cases found.")
 
             return
 
         for test_case in test_cases:
-
             result = self.runner.run_python(
                 source_code=submission.source_code,
                 stdin=test_case.input_data,
             )
 
-            submission.execution_time_ms = (
-                result.execution_time_ms
-            )
+            submission.execution_time_ms = result.execution_time_ms
 
             if result.exit_code != 0:
-                submission.status = (
-                    SubmissionStatus.RUNTIME_ERROR
-                )
+                submission.status = SubmissionStatus.RUNTIME_ERROR
 
                 self.submission_repository.db.commit()
 
-                print(
-                    f"[Judge] Runtime error on test case {test_case.id}"
-                )
+                print(f"[Judge] Runtime error on test case {test_case.id}")
 
                 return
 
@@ -106,15 +89,11 @@ class JudgeService:
             )
 
             if not passed:
-                submission.status = (
-                    SubmissionStatus.WRONG_ANSWER
-                )
+                submission.status = SubmissionStatus.WRONG_ANSWER
 
                 self.submission_repository.db.commit()
 
-                print(
-                    f"[Judge] Wrong answer on test case {test_case.id}"
-                )
+                print(f"[Judge] Wrong answer on test case {test_case.id}")
 
                 return
 
@@ -126,6 +105,4 @@ class JudgeService:
             problem_id=submission.problem_id,
         )
 
-        print(
-            f"[Judge] Accepted submission {submission.id}"
-        )
+        print(f"[Judge] Accepted submission {submission.id}")

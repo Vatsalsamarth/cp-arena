@@ -1,9 +1,13 @@
+import json
+
 from sqlalchemy.orm import Session
 
+from app.core.cache import invalidate_tracked, set_tracked
 from app.core.exceptions import (
     ProblemAlreadyExistsError,
     ProblemNotFoundError,
 )
+from app.core.redis import redis_client
 from app.models.problem import Problem
 from app.repositories.problem_repository import ProblemRepository
 from app.schemas.problem import ProblemCreate, ProblemUpdate
@@ -26,21 +30,25 @@ class ProblemService:
         """
 
         if self.repository.get_by_title(problem_create.title):
-            raise ProblemAlreadyExistsError(
-                "Problem title already exists."
-            )
+            raise ProblemAlreadyExistsError("Problem title already exists.")
 
         if self.repository.get_by_slug(problem_create.slug):
-            raise ProblemAlreadyExistsError(
-                "Problem slug already exists."
-            )
+            raise ProblemAlreadyExistsError("Problem slug already exists.")
 
-        return self.repository.create(
+        result = self.repository.create(
             title=problem_create.title,
             slug=problem_create.slug,
             statement=problem_create.statement,
             difficulty=problem_create.difficulty,
         )
+
+        # Invalidate cached problem lists after creating a new problem.
+        try:
+            invalidate_tracked(redis_client, "problems:keys")
+        except Exception:
+            pass
+
+        return result
 
     def list_problems(
         self,
@@ -59,6 +67,16 @@ class ProblemService:
         with pagination metadata.
         """
 
+        cache_key = (
+            f"problems:{title}:{slug}:{min_difficulty}:"
+            f"{max_difficulty}:{sort_by}:{order}:{limit}:{offset}"
+        )
+
+        cached = redis_client.get(cache_key)
+
+        if cached is not None:
+            return json.loads(cached)
+
         items, total = self.repository.list_all(
             title=title,
             slug=slug,
@@ -70,13 +88,35 @@ class ProblemService:
             offset=offset,
         )
 
-        return {
-            "items": items,
+        # Convert ORM objects into serializable dicts for caching.
+        items_payload = [
+            {
+                "id": p.id,
+                "title": p.title,
+                "slug": p.slug,
+                "statement": p.statement,
+                "difficulty": p.difficulty,
+            }
+            for p in items
+        ]
+
+        payload = {
+            "items": items_payload,
             "total": total,
             "limit": limit,
             "offset": offset,
             "has_next": offset + limit < total,
         }
+
+        set_tracked(
+            redis_client=redis_client,
+            tracking_set="problems:keys",
+            key=cache_key,
+            value=json.dumps(payload),
+            ex=30,
+        )
+
+        return payload
 
     def get_problem_or_raise(
         self,
@@ -89,9 +129,7 @@ class ProblemService:
         problem = self.repository.get_by_slug(slug)
 
         if problem is None:
-            raise ProblemNotFoundError(
-                "Problem not found."
-            )
+            raise ProblemNotFoundError("Problem not found.")
 
         return problem
 
@@ -121,36 +159,29 @@ class ProblemService:
             exclude_none=True,
         )
 
-        if (
-            "title" in update_data
-            and update_data["title"] != problem.title
-        ):
-            existing = self.repository.get_by_title(
-                update_data["title"]
-            )
+        if "title" in update_data and update_data["title"] != problem.title:
+            existing = self.repository.get_by_title(update_data["title"])
 
             if existing is not None:
-                raise ProblemAlreadyExistsError(
-                    "Problem title already exists."
-                )
+                raise ProblemAlreadyExistsError("Problem title already exists.")
 
-        if (
-            "slug" in update_data
-            and update_data["slug"] != problem.slug
-        ):
-            existing = self.repository.get_by_slug(
-                update_data["slug"]
-            )
+        if "slug" in update_data and update_data["slug"] != problem.slug:
+            existing = self.repository.get_by_slug(update_data["slug"])
 
             if existing is not None:
-                raise ProblemAlreadyExistsError(
-                    "Problem slug already exists."
-                )
+                raise ProblemAlreadyExistsError("Problem slug already exists.")
 
         for field, value in update_data.items():
             setattr(problem, field, value)
 
-        return self.repository.update(problem)
+        updated = self.repository.update(problem)
+
+        try:
+            invalidate_tracked(redis_client, "problems:keys")
+        except Exception:
+            pass
+
+        return updated
 
     def delete_problem(
         self,
@@ -163,3 +194,8 @@ class ProblemService:
         problem = self.get_problem_or_raise(slug)
 
         self.repository.delete(problem)
+
+        try:
+            invalidate_tracked(redis_client, "problems:keys")
+        except Exception:
+            pass
