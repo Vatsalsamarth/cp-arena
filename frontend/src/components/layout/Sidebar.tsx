@@ -1,4 +1,7 @@
 import {
+  History,
+} from "lucide-react";
+import {
   LayoutDashboard,
   Trophy,
   Code2,
@@ -28,6 +31,11 @@ const links = [
     path: "/profile",
     icon: User,
   },
+  {
+  name: "Submissions",
+  path: "/submissions",
+  icon: History,
+},
 ];
 
 export function Sidebar() {

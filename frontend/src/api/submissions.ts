@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "@/api/endpoints";
 
 import type {
   Submission,
+  SubmissionListResponse,
   SubmissionRequest,
 } from "@/types/submission";
 
@@ -13,6 +14,25 @@ export async function createSubmission(
     await apiClient.post<Submission>(
       API_ENDPOINTS.submissions.create,
       payload,
+    );
+
+  return response.data;
+}
+
+
+export async function getSubmissions(
+  page = 1,
+  size = 10,
+): Promise<SubmissionListResponse> {
+  const response =
+    await apiClient.get<SubmissionListResponse>(
+      API_ENDPOINTS.submissions.list,
+      {
+        params: {
+          page,
+          size,
+        },
+      },
     );
 
   return response.data;
