@@ -10,6 +10,7 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 
 import { LoginPage } from "@/pages/LoginPage";
 import { DashboardPage } from "@/pages/dashboard/DashboardPage";
+import { ProblemsPage } from "@/pages/problems/ProblemsPage";
 
 function RootLayout() {
   return (
@@ -40,6 +41,11 @@ const router = createBrowserRouter([
               {
                 path: "/",
                 element: <DashboardPage />,
+              },
+
+              {
+                path: "/problems",
+                element: <ProblemsPage />,
               },
             ],
           },
