@@ -25,10 +25,7 @@ export function ProblemDetailPage() {
     isLoading,
   } = useQuery({
     queryKey: ["problem", slug],
-
-    queryFn: () =>
-      getProblem(slug!),
-
+    queryFn: () => getProblem(slug!),
     enabled: Boolean(slug),
   });
 
@@ -72,7 +69,7 @@ export function ProblemDetailPage() {
         </h2>
 
         <p className="whitespace-pre-wrap text-muted-foreground">
-          {problem.description}
+          {problem.statement}
         </p>
       </section>
     </div>

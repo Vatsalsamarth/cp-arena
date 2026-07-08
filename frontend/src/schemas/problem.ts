@@ -10,15 +10,13 @@ export const problemSchema = z.object({
     .string()
     .min(3),
 
-  description: z
+  statement: z
     .string()
     .min(10),
 
-  difficulty: z.enum([
-    "easy",
-    "medium",
-    "hard",
-  ]),
+  difficulty: z
+    .string()
+    .regex(/^\d+$/, "Difficulty must be a number"),
 
   tags: z
     .string()
