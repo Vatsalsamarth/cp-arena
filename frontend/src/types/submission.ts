@@ -13,6 +13,7 @@ export interface SubmissionRequest {
 
 export interface Submission {
   id: number;
+  problem_id: number;
   status: SubmissionStatus;
   language: string;
   created_at: string;
