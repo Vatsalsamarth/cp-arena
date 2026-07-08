@@ -2,17 +2,22 @@ import { create } from "zustand";
 
 import { tokenStorage } from "@/api/storage";
 
+import type { User } from "@/types/user";
+
 interface AuthState {
   token: string | null;
+  user: User | null;
   isAuthenticated: boolean;
+
   setToken: (token: string) => void;
+  setUser: (user: User) => void;
   logout: () => void;
   initialize: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
-
+  user: null,
   isAuthenticated: false,
 
   setToken: (token) => {
@@ -24,11 +29,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
+  setUser: (user) => {
+    set({
+      user,
+    });
+  },
+
   logout: () => {
     tokenStorage.clear();
 
     set({
       token: null,
+      user: null,
       isAuthenticated: false,
     });
   },
