@@ -1,11 +1,10 @@
 import {
+  Code2,
   History,
-} from "lucide-react";
-import {
   LayoutDashboard,
   Trophy,
-  Code2,
   User,
+  Shield,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -22,6 +21,11 @@ const links = [
     icon: Code2,
   },
   {
+    name: "Submissions",
+    path: "/submissions",
+    icon: History,
+  },
+  {
     name: "Leaderboard",
     path: "/leaderboard",
     icon: Trophy,
@@ -32,10 +36,10 @@ const links = [
     icon: User,
   },
   {
-  name: "Submissions",
-  path: "/submissions",
-  icon: History,
-},
+    name: "Admin",
+    path: "/admin",
+    icon: Shield,
+  },
 ];
 
 export function Sidebar() {
@@ -50,11 +54,12 @@ export function Sidebar() {
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
+                [
+                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
-                }`
+                    : "hover:bg-muted",
+                ].join(" ")
               }
             >
               <Icon className="h-4 w-4" />
