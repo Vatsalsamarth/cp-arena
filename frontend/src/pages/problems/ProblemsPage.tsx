@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { Link } from "react-router-dom";
+
 import { useProblems } from "@/hooks/useProblems";
 
 export function ProblemsPage() {
@@ -30,7 +32,7 @@ export function ProblemsPage() {
         </h1>
 
         <p className="text-muted-foreground">
-          Practice competitive programming.
+          Solve competitive programming challenges.
         </p>
       </section>
 
@@ -45,18 +47,25 @@ export function ProblemsPage() {
 
       <div className="space-y-4">
         {data?.items?.map((problem) => (
-          <div
+          <Link
             key={problem.id}
-            className="rounded-2xl border border-border bg-card p-5"
+            to={`/problems/${problem.slug}`}
+            className="block rounded-2xl border border-border bg-card p-5 transition hover:bg-muted"
           >
-            <h2 className="text-xl font-semibold">
-              {problem.title}
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                {problem.title}
+              </h2>
 
-            <p className="mt-2 text-sm capitalize text-muted-foreground">
-              {problem.difficulty}
+              <span className="rounded-full bg-muted px-3 py-1 text-sm capitalize">
+                {problem.difficulty}
+              </span>
+            </div>
+
+            <p className="mt-2 text-sm text-muted-foreground">
+              {problem.tags?.join(", ")}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
