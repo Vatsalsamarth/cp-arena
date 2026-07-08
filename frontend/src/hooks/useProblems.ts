@@ -1,8 +1,7 @@
-import {
-  useQuery,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { getProblems } from "@/api/problems";
+import { queryKeys } from "@/lib/queryKeys";
 
 export function useProblems(params?: {
   page?: number;
@@ -11,10 +10,7 @@ export function useProblems(params?: {
   difficulty?: string;
 }) {
   return useQuery({
-    queryKey: [
-      "problems",
-      params,
-    ],
+    queryKey: queryKeys.problems.list(params),
 
     queryFn: () =>
       getProblems(params),
