@@ -1,9 +1,11 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
 
 import { apiClient } from "@/api/client";
 import { API_ENDPOINTS } from "@/api/endpoints";
+
+import { Button } from "@/components/ui/button";
 
 import type { Problem } from "@/types/problem";
 
@@ -48,14 +50,20 @@ export function ProblemDetailPage() {
 
   return (
     <div className="space-y-6">
-      <section>
+      <section className="space-y-4">
         <h1 className="text-3xl font-bold">
           {problem.title}
         </h1>
 
-        <span className="mt-3 inline-flex rounded-full bg-muted px-3 py-1 text-sm capitalize">
+        <span className="inline-flex rounded-full bg-muted px-3 py-1 text-sm capitalize">
           {problem.difficulty}
         </span>
+
+        <Link to={`/solve/${problem.slug}`}>
+          <Button>
+            Solve Problem
+          </Button>
+        </Link>
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-6">
