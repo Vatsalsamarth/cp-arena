@@ -5,9 +5,11 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
+
 import { LoginPage } from "@/pages/LoginPage";
+import { DashboardPage } from "@/pages/dashboard/DashboardPage";
 
 function RootLayout() {
   return (
@@ -17,51 +19,33 @@ function RootLayout() {
   );
 }
 
-function HomePage() {
-  return (
-    <main className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6">
-      <section className="w-full max-w-xl rounded-3xl border border-border bg-card p-10 shadow-2xl">
-        <div className="space-y-6 text-center">
-          <span className="inline-flex rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium">
-            CP Arena
-          </span>
-
-          <h1 className="text-5xl font-bold tracking-tight">
-            Competitive Programming,
-            <br />
-            Reimagined.
-          </h1>
-
-          <p className="text-muted-foreground">
-            Welcome to CP Arena.
-          </p>
-
-          <Button size="lg">
-            Platform Ready
-          </Button>
-        </div>
-      </section>
-    </main>
-  );
-}
-
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
+
     children: [
       {
         path: "/login",
         element: <LoginPage />,
       },
+
       {
         element: <ProtectedRoute />,
+
         children: [
           {
-            path: "/",
-            element: <HomePage />,
+            element: <DashboardLayout />,
+
+            children: [
+              {
+                path: "/",
+                element: <DashboardPage />,
+              },
+            ],
           },
         ],
       },
+
       {
         path: "*",
         element: <Navigate to="/" replace />,
