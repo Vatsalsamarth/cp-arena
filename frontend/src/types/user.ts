@@ -6,19 +6,25 @@ export interface User {
 }
 
 export interface UserStats {
-  solved_count: number;
-  submission_count: number;
-  accepted_count: number;
-  success_rate: number;
+  total_submissions: number;
+  accepted: number;
+  wrong_answer: number;
+  runtime_error: number;
+  compilation_error: number;
+  acceptance_rate: number;
 }
 
 export interface LeaderboardUser {
-  id: number;
-  username: string;
-  solved_count: number;
   rank: number;
+  user_id: number;
+  username: string;
+  score: number;
 }
 
 export interface LeaderboardResponse {
   items: LeaderboardUser[];
+  total: number;
+  limit: number;
+  offset: number;
+  has_next: boolean;
 }
