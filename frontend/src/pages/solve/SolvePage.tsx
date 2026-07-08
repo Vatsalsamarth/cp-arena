@@ -1,7 +1,10 @@
-
 import { useState } from "react";
 
+import toast from "react-hot-toast";
+
 import { CodeEditor } from "@/components/editor/CodeEditor";
+
+import { useSubmission } from "@/hooks/useSubmission";
 
 import { Button } from "@/components/ui/button";
 
@@ -24,15 +27,35 @@ export function SolvePage() {
   const [language, setLanguage] =
     useState("python");
 
-  const [code, setCode] = useState(
-    "# Write your solution here",
-  );
+  const [code, setCode] =
+    useState("");
+
+  const {
+    mutate,
+    isPending,
+  } = useSubmission();
 
   function handleSubmit() {
-    console.log({
-      language,
-      code,
-    });
+    mutate(
+      {
+        problem_id: 1,
+        language,
+        source_code: code,
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            "Submission created",
+          );
+        },
+
+        onError: () => {
+          toast.error(
+            "Submission failed",
+          );
+        },
+      },
+    );
   }
 
   return (
@@ -43,7 +66,7 @@ export function SolvePage() {
         </h1>
 
         <p className="text-muted-foreground">
-          Write your solution and submit.
+          Submit your solution.
         </p>
       </section>
 
@@ -65,8 +88,13 @@ export function SolvePage() {
           ))}
         </select>
 
-        <Button onClick={handleSubmit}>
-          Submit Solution
+        <Button
+          onClick={handleSubmit}
+          disabled={isPending}
+        >
+          {isPending
+            ? "Submitting..."
+            : "Submit Solution"}
         </Button>
       </div>
 
