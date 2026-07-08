@@ -1,6 +1,5 @@
 import { useUserStats } from "@/hooks/useUserStats";
 
-
 export function DashboardPage() {
   const {
     data: stats,

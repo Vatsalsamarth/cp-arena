@@ -11,3 +11,14 @@ export interface UserStats {
   accepted_count: number;
   success_rate: number;
 }
+
+export interface LeaderboardUser {
+  id: number;
+  username: string;
+  solved_count: number;
+  rank: number;
+}
+
+export interface LeaderboardResponse {
+  items: LeaderboardUser[];
+}
