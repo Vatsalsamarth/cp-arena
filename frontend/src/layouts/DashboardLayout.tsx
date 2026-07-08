@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 
 export function DashboardLayout() {
@@ -15,7 +16,11 @@ export function DashboardLayout() {
         <Sidebar />
 
         <main className="min-h-[calc(100vh-4rem)] flex-1 overflow-x-hidden p-4 md:p-6">
-          <Outlet />
+
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
+
         </main>
 
       </div>
