@@ -1,14 +1,15 @@
-export type Difficulty =
-  | "easy"
-  | "medium"
-  | "hard";
+export type Difficulty = number;
 
 export interface Problem {
   id: number;
   title: string;
   slug: string;
-  description?: string;
+
+  // Backend contract
+  statement: string;
   difficulty: Difficulty;
+
+  // Optional fields for future compatibility
   tags?: string[];
   created_at?: string;
 }

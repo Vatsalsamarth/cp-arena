@@ -71,19 +71,16 @@ export function SolvePage() {
     enabled: Boolean(slug),
   });
 
-
   const {
     mutate,
     isPending,
   } = useSubmission();
-
 
   const {
     data: submission,
   } = useSubmissionStatus(
     submissionId,
   );
-
 
   function handleSubmit() {
     if (!problem) return;
@@ -112,7 +109,6 @@ export function SolvePage() {
     );
   }
 
-
   if (isLoading) {
     return (
       <div>
@@ -120,7 +116,6 @@ export function SolvePage() {
       </div>
     );
   }
-
 
   if (!problem) {
     return (
@@ -130,12 +125,9 @@ export function SolvePage() {
     );
   }
 
-
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-
       <section className="space-y-6 rounded-2xl border border-border bg-card p-6">
-
         <div>
           <h1 className="text-3xl font-bold">
             {problem.title}
@@ -146,17 +138,15 @@ export function SolvePage() {
           </span>
         </div>
 
-
         <div>
           <h2 className="mb-3 text-xl font-semibold">
             Problem Statement
           </h2>
 
           <p className="whitespace-pre-wrap text-muted-foreground">
-            {problem.description}
+            {problem.statement}
           </p>
         </div>
-
 
         {submission && (
           <div className="space-y-2">
@@ -169,14 +159,10 @@ export function SolvePage() {
             />
           </div>
         )}
-
       </section>
 
-
       <section className="space-y-4">
-
         <div className="flex items-center justify-between">
-
           <select
             className="rounded-xl border border-border bg-background px-4 py-2"
             value={language}
@@ -198,7 +184,6 @@ export function SolvePage() {
             )}
           </select>
 
-
           <Button
             onClick={handleSubmit}
             disabled={isPending}
@@ -207,18 +192,14 @@ export function SolvePage() {
               ? "Submitting..."
               : "Submit"}
           </Button>
-
         </div>
-
 
         <CodeEditor
           value={code}
           language={language}
           onChange={setCode}
         />
-
       </section>
-
     </div>
   );
 }
