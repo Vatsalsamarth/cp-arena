@@ -17,3 +17,15 @@ export async function createSubmission(
 
   return response.data;
 }
+
+
+export async function getSubmission(
+  id: number,
+): Promise<Submission> {
+  const response =
+    await apiClient.get<Submission>(
+      `${API_ENDPOINTS.submissions.list}/${id}`,
+    );
+
+  return response.data;
+}
