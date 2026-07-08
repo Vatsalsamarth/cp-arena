@@ -38,13 +38,18 @@ class Settings(BaseSettings):
             "sqlite://",
             "sqlite+pysqlite://",
             "postgresql://",
+            "postgresql+psycopg://",
+            "postgresql+psycopg2://",
+            "postgresql+asyncpg://",
             "postgres://",
             "mysql://",
             "mysql+pymysql://",
         )
 
         if not value.startswith(valid_prefixes):
-            raise ValueError("DATABASE_URL must be a valid SQLAlchemy database URL.")
+            raise ValueError(
+                "DATABASE_URL must be a valid SQLAlchemy database URL."
+            )
 
         return value
 
@@ -54,7 +59,9 @@ class Settings(BaseSettings):
             raise ValueError("REDIS_URL must be set.")
 
         if not value.startswith(("redis://", "rediss://")):
-            raise ValueError("REDIS_URL must use redis:// or rediss:// scheme.")
+            raise ValueError(
+                "REDIS_URL must use redis:// or rediss:// scheme."
+            )
 
         return value
 
@@ -68,14 +75,24 @@ class Settings(BaseSettings):
             raise ValueError("SECRET_KEY must be set.")
 
         debug = info.data.get("DEBUG", True)
+
         if not debug and len(value) < 32:
-            raise ValueError("SECRET_KEY must be set and at least 32 characters long.")
+            raise ValueError(
+                "SECRET_KEY must be set and at least 32 characters long."
+            )
 
         return value
 
     @field_validator("JWT_ALGORITHM")
     def validate_jwt_algorithm(cls, value: str) -> str:
-        supported = {"HS256", "HS384", "HS512", "RS256", "ES256"}
+        supported = {
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "ES256",
+        }
+
         if value not in supported:
             raise ValueError(
                 f"JWT_ALGORITHM must be one of: {', '.join(sorted(supported))}."
@@ -86,7 +103,9 @@ class Settings(BaseSettings):
     @field_validator("ACCESS_TOKEN_EXPIRE_MINUTES")
     def validate_access_token_ttl(cls, value: int) -> int:
         if value <= 0:
-            raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be greater than 0.")
+            raise ValueError(
+                "ACCESS_TOKEN_EXPIRE_MINUTES must be greater than 0."
+            )
 
         return value
 
