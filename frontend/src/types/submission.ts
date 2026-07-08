@@ -16,5 +16,14 @@ export interface Submission {
   problem_id: number;
   status: SubmissionStatus;
   language: string;
+  source_code?: string;
   created_at: string;
+}
+
+export interface SubmissionListResponse {
+  items: Submission[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
 }

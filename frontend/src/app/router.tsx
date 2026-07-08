@@ -1,3 +1,4 @@
+import { SubmissionsPage } from "@/pages/submissions/SubmissionsPage";
 import {
   createBrowserRouter,
   Navigate,
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <DashboardPage />,
               },
+              {
+  path: "/submissions",
+  element: <SubmissionsPage />,
+},
 
               {
                 path: "/problems",
