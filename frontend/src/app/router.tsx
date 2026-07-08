@@ -1,4 +1,3 @@
-import { SubmissionsPage } from "@/pages/submissions/SubmissionsPage";
 import {
   createBrowserRouter,
   Navigate,
@@ -13,6 +12,11 @@ import { LoginPage } from "@/pages/LoginPage";
 import { DashboardPage } from "@/pages/dashboard/DashboardPage";
 import { ProblemsPage } from "@/pages/problems/ProblemsPage";
 import { ProblemDetailPage } from "@/pages/problems/ProblemDetailPage";
+import { SolvePage } from "@/pages/solve/SolvePage";
+import { SubmissionsPage } from "@/pages/submissions/SubmissionsPage";
+import { ProfilePage } from "@/pages/profile/ProfilePage";
+import { LeaderboardPage } from "@/pages/leaderboard/LeaderboardPage";
+import { AdminPage } from "@/pages/admin/AdminPage";
 
 function RootLayout() {
   return (
@@ -44,10 +48,6 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <DashboardPage />,
               },
-              {
-  path: "/submissions",
-  element: <SubmissionsPage />,
-},
 
               {
                 path: "/problems",
@@ -57,6 +57,31 @@ const router = createBrowserRouter([
               {
                 path: "/problems/:slug",
                 element: <ProblemDetailPage />,
+              },
+
+              {
+                path: "/solve/:slug",
+                element: <SolvePage />,
+              },
+
+              {
+                path: "/submissions",
+                element: <SubmissionsPage />,
+              },
+
+              {
+                path: "/profile",
+                element: <ProfilePage />,
+              },
+
+              {
+                path: "/leaderboard",
+                element: <LeaderboardPage />,
+              },
+
+              {
+                path: "/admin",
+                element: <AdminPage />,
               },
             ],
           },
