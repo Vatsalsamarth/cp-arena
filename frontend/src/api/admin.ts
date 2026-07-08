@@ -17,3 +17,29 @@ export async function createProblem(
 
   return response.data;
 }
+
+
+export async function deleteProblem(
+  id: number,
+) {
+  const response =
+    await apiClient.delete(
+      `${API_ENDPOINTS.problems.list}/${id}`,
+    );
+
+  return response.data;
+}
+
+
+export async function updateProblem(
+  id: number,
+  payload: Partial<Problem>,
+) {
+  const response =
+    await apiClient.put<Problem>(
+      `${API_ENDPOINTS.problems.list}/${id}`,
+      payload,
+    );
+
+  return response.data;
+}

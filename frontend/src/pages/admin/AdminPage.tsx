@@ -7,7 +7,7 @@ import {
 } from "@hookform/resolvers/zod";
 
 import toast from "react-hot-toast";
-
+import { ProblemManagement } from "@/components/admin/ProblemManagement";
 import {
   problemSchema,
   type ProblemFormData,
@@ -138,7 +138,9 @@ export function AdminPage() {
         </button>
 
       </form>
+      <ProblemManagement />
 
     </div>
+
   );
 }
